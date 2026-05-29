@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - World Cup Predictor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <!-- Contenedor Principal -->
+  <div class="container-main">
+    <div class="card-container">
+      <div class="text-center mb-4">
+        <h1>⚽ World Cup Predictor</h1>
+        <p class="text-muted">Predice los resultados de los mejores partidos</p>
+      </div>
+
+      <!-- Alert para mensajes -->
+      <div id="alertContainer"></div>
+
+      <!-- Formulario de Login -->
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username" class="form-label">Usuario</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            placeholder="Ingresa tu usuario"
+            required
+            minlength="3"
+          >
+          <div class="error-message" id="usernameError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Contraseña</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            placeholder="Ingresa tu contraseña"
+            required
+            minlength="6"
+          >
+          <div class="error-message" id="passwordError"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <span id="btnText">Iniciar Sesión</span>
+          <span id="btnSpinner" class="spinner" style="display: none; margin-left: 0.5rem;"></span>
+        </button>
+      </form>
+
+      <!-- Link a Registro -->
+      <div class="link-auth">
+        <p>¿No tienes cuenta? <a href="register.html">Regístrate aquí</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../js/config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/api.js"></script>
+  <script>
+    /**
+     * Gestión del formulario de Login
+     */
+
+    const loginForm = document.getElementById('loginForm');
+    const alertContainer = document.getElementById('alertContainer');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    /**
+     * Mostrar alerta
+     * @param {string} message - Mensaje a mostrar
+     * @param {string} type - Tipo de alerta (success, danger, info, warning)
+     */
+    function showAlert(message, type = 'danger') {
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type} alert-dismissible fade show`;
+      alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+
+      alertContainer.innerHTML = '';
+      alertContainer.appendChild(alert);
+
+      // Auto-cerrar después de 5 segundos
+      setTimeout(() => {
+        if (alert.parentElement) {
+          alert.remove();
+        }
+      }, 5000);
+    }
+
+    /**
+     * Validar formulario
+     * @returns {boolean}
+     */
+    function validateForm() {
+      const username = document.getElementById('username');
+      const password = document.getElementById('password');
+      let isValid = true;
+
+      // Validar usuario
+      if (!username.value || username.value.length < 3) {
+        showErrorMessage('usernameError', 'Usuario debe tener al menos 3 caracteres');
+        isValid = false;
+      }
+
+      // Validar contraseña
+      if (!password.value || password.value.length < 6) {
+        showErrorMessage('passwordError', 'Contraseña debe tener al menos 6 caracteres');
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
+    /**
+     * Mostrar mensaje de error
+     * @param {string} elementId - ID del elemento de error
+     * @param {string} message - Mensaje de error
+     */
+    function showErrorMessage(elementId, message) {
+      const errorElement = document.getElementById(elementId);
+      if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.add('show');
+      }
+    }
+
+    /**
+     * Limpiar mensajes de error
+     */
+    function clearErrorMessages() {
+      document.querySelectorAll('.error-message').forEach(el => {
+        el.textContent = '';
+        el.classList.remove('show');
+      });
+    }
+
+    /**
+     * Manejar envío del formulario
+     */
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Limpiar errores previos
+      clearErrorMessages();
+      alertContainer.innerHTML = '';
+
+      // Validar formulario
+      if (!validateForm()) {
+        return;
+      }
+
+      // Mostrar estado de carga
+      submitBtn.disabled = true;
+      btnText.style.display = 'none';
+      btnSpinner.style.display = 'inline-block';
+
+      try {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // Realizar login
+        const result = await authManager.login(username, password);
+
+        showAlert('¡Bienvenido! Redirigiendo...', 'success');
+
+        // Redirigir al dashboard después de 1 segundo
+        setTimeout(() => {
+          window.location.href = '../html/dashboard.html';
+        }, 1000);
+
+      } catch (error) {
+        debugLog('Error en login', error);
+
+        let errorMessage = 'Error al iniciar sesión. Intenta nuevamente.';
+
+        // Capturar errores específicos
+        if (error.message.includes('401')) {
+          errorMessage = 'Usuario o contraseña incorrectos.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Error de conexión. Verifica tu conexión a internet.';
+        }
+
+        showAlert(errorMessage, 'danger');
+      } finally {
+        // Restaurar estado del botón
+        submitBtn.disabled = false;
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+      }
+    });
+
+    /**
+     * Limpiar errores al escribir
+     */
+    document.getElementById('username').addEventListener('input', () => {
+      document.getElementById('usernameError').classList.remove('show');
+    });
+
+    document.getElementById('password').addEventListener('input', () => {
+      document.getElementById('passwordError').classList.remove('show');
+    });
+
+    /**
+     * Verificar si ya está autenticado
+     */
+    window.addEventListener('load', () => {
+      if (authManager.isAuthenticated() && !authManager.isTokenExpired()) {
+        // Si ya está autenticado, redirigir al dashboard
+        window.location.href = '../html/dashboard.html';
+      }
+    });
+  </script>
+</body>
+</html>
+

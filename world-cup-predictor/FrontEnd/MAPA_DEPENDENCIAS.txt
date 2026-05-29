@@ -1,0 +1,400 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║             MAPA DE DEPENDENCIAS Y CONEXIONES DEL FRONTEND                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+🏠 INDEX.HTML (Landing Page)
+═══════════════════════════════════════════════════════════════════════════════
+   └─ CDN Bootstrap 5.3.0
+   └─ css/styles.css ────┬─→ Estilos globales
+                         └─→ Variables CSS (colores, sombras, etc)
+   └─ js/config.js ──────→ Configuración global
+   └─ js/auth.js ────────→ AuthManager (para verificar autenticación)
+
+   FLUJO:
+   1. Carga de página
+   2. AuthManager verifica si hay JWT válido
+   3. Si sí → Redirige a dashboard.html
+   4. Si no → Muestra landing page
+
+
+📋 HTML/LOGIN.HTML
+═══════════════════════════════════════════════════════════════════════════════
+   └─ CDN Bootstrap 5.3.0
+   └─ css/styles.css ────→ .card-container, .btn-primary, .alert
+   └─ js/config.js ──────→ CONFIG.DEBUG, CONFIG.REQUEST_TIMEOUT
+   └─ js/auth.js ────────→ authManager.login()
+   └─ js/api.js ─────────→ ApiClient (internamente usado por auth)
+
+   FLUJO:
+   1. Usuario ingresa credenciales
+   2. Form valida localmente
+   3. authManager.login(username, password)
+   4. ApiClient hace POST /api/auth/login
+   5. Recibe { accessToken, refreshToken, user }
+   6. Guarda en localStorage
+   7. Redirige a dashboard.html
+
+
+📝 HTML/REGISTER.HTML
+═══════════════════════════════════════════════════════════════════════════════
+   └─ CDN Bootstrap 5.3.0
+   └─ css/styles.css ────→ Estilos de formulario
+   └─ js/config.js ──────→ Configuración
+   └─ js/auth.js ────────→ authManager.register()
+   └─ js/api.js ─────────→ ApiClient
+
+   FLUJO:
+   1. Usuario completa formulario de registro
+   2. Validaciones locales
+   3. authManager.register(name, username, password)
+   4. ApiClient hace POST /api/auth/register
+   5. Si éxito → Redirige a login.html
+   6. Si error → Muestra alerta
+
+
+📊 HTML/DASHBOARD.HTML
+═══════════════════════════════════════════════════════════════════════════════
+   └─ CDN Bootstrap 5.3.0 + JS Bundle
+   └─ css/styles.css ────→ .dashboard-header, .prediction-card
+   └─ js/config.js ──────→ CONFIG endpoints
+   └─ js/auth.js ────────→ authManager.isAuthenticated(), logout, user data
+   └─ js/api.js ─────────→ PredictionService, UserService
+
+   COMPONENTES INTERNOS:
+   ├─ Navbar
+   │  └─ userGreeting (AuthManager.getUser())
+   │  └─ logout() button
+   │
+   ├─ Team Selector
+   │  ├─ GET /api/teams/list →PredictionService.getTeams()
+   │  └─ Popula selects
+   │
+   ├─ Prediction Center
+   │  ├─ Input: homeTeam, awayTeam
+   │  ├─ Button: predictMatch()
+   │  ├─ POST /api/matches/predict
+   │  └─ Muestra resultado
+   │
+   ├─ History Sidebar
+   │  ├─ GET /api/matches/history
+   │  └─ Muestra últimas 5 predicciones
+   │
+   └─ Modal Guardar
+      ├─ savePrediction()
+      └─ confirmarSavePrediction()
+
+   FLUJO:
+   1. Página carga
+   2. Verifica autenticación
+   3. Carga lista de equipos
+   4. Carga historial
+   5. Usuario selecciona equipos
+   6. Presiona "Predecir"
+   7. POST /api/matches/predict
+   8. Muestra resultado
+   9. Usuario puede guardar
+
+
+📦 ARCHIVOS JAVASCRIPT
+═══════════════════════════════════════════════════════════════════════════════
+
+js/CONFIG.JS
+   Importado por: login.html, register.html, dashboard.html
+   Exporta: CONFIG (objeto global)
+
+   const CONFIG = {
+     API_BASE_URL: "http://localhost:8080/api",
+     ENDPOINTS: {
+       AUTH: { LOGIN, REGISTER, REFRESH },
+       MATCHES: { PREDICT, LIST, HISTORY },
+       TEAMS: { LIST, SEARCH },
+       USER: { PROFILE, UPDATE }
+     },
+     STORAGE: { TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY },
+     REQUEST_TIMEOUT: 5000,
+     DEBUG: true
+   }
+
+   Funciones:
+   ├─ getApiUrl(endpoint) → "http://localhost:8080/api/..."
+   └─ debugLog(message, data) → console.log (si DEBUG=true)
+
+
+js/AUTH.JS
+   Importado por: login.html, register.html, dashboard.html
+   Exporta: authManager (instancia global de AuthManager)
+
+   Depende de: config.js, api.js
+
+   Clase AuthManager:
+   ├─ Propiedades
+   │  ├─ token: string (JWT access token)
+   │  ├─ refreshToken: string
+   │  └─ user: object
+   │
+   ├─ Métodos públicos
+   │  ├─ login(username, password) → Promise
+   │  ├─ register(name, username, password) → Promise
+   │  ├─ logout() → void
+   │  ├─ isAuthenticated() → boolean
+   │  ├─ getToken() → string
+   │  ├─ getUser() → object
+   │  ├─ isTokenExpired() → boolean
+   │  ├─ refreshAccessToken() → Promise
+   │  └─ decodeToken(token) → object
+   │
+   └─ Métodos privados
+      ├─ setTokens(accessToken, refreshToken)
+      ├─ getStoredToken()
+      ├─ getStoredUser()
+      └─ setUser(userData)
+
+   FLUJO DE LOGIN:
+   1. authManager.login("user", "pass")
+   2. Llama apiClient.post("/auth/login", {username, password})
+   3. Recibe { accessToken, refreshToken, user }
+   4. setTokens(accessToken, refreshToken)
+   5. setUser(user)
+   6. localStorage.setItem(keys)
+   7. Retorna { success: true, user }
+
+
+js/API.JS
+   Importado por: login.html, register.html, dashboard.html
+   Exporta:
+   ├─ apiClient (instancia global de ApiClient)
+   ├─ PredictionService (clase static)
+   └─ UserService (clase static)
+
+   Depende de: config.js, auth.js
+
+   Clase ApiClient:
+   ├─ request(endpoint, method, data, options)
+   │  ├─ Prepara headers (Content-Type, Authorization: Bearer)
+   │  ├─ Si 401 → Intenta refrescar token
+   │  ├─ Si error → Retorna error
+   │  └─ Si ok → Retorna JSON
+   │
+   ├─ get(endpoint, options)
+   ├─ post(endpoint, data, options)
+   ├─ put(endpoint, data, options)
+   └─ delete(endpoint, options)
+
+   PredictionService (métodos static):
+   ├─ getTeams()
+   ├─ searchTeams(query)
+   ├─ predictMatch(homeTeam, awayTeam)
+   ├─ getMatchHistory()
+   └─ getMatches()
+
+   UserService (métodos static):
+   ├─ getProfile()
+   └─ updateProfile(userData)
+
+   FLUJO DE REQUEST:
+   1. PredictionService.predictMatch("1", "2")
+   2. ApiClient.post("/matches/predict", {homeTeam:"1", awayTeam:"2"})
+   3. Prepara headers:
+      ├─ Content-Type: application/json
+      └─ Authorization: Bearer [token de auth.js]
+   4. fetch(url, config)
+   5. Si 401 → authManager.refreshAccessToken()
+   6. Si falla refresh → logout()
+   7. Si ok → retorna JSON
+
+
+js/UTILITIES.JS
+   Importado por: Opcional (en dashboardo para funciones extra)
+   Exporta: Funciones globales
+
+   Utilidades incluidas:
+   ├─ formatDate(date) → "29 de mayo de 2025"
+   ├─ formatTime(date) → "18:30:45"
+   ├─ validateEmail(email) → boolean
+   ├─ validatePassword(password) → boolean
+   ├─ validateUsername(username) → boolean
+   ├─ truncateText(text, maxLength) → "Texto largo..."
+   ├─ capitalize(text) → "Texto"
+   ├─ debounce(func, wait) → function
+   ├─ throttle(func, limit) → function
+   ├─ copyToClipboard(text) → Promise
+   ├─ downloadFile(content, filename)
+   ├─ getURLParam(name) → value
+   ├─ sleep(ms) → Promise
+   ├─ isMobile() → boolean
+   ├─ generateId() → "_abc123xyz"
+   ├─ objectToParams(obj) → "key=value&..."
+   ├─ formatCurrency(value, currency)
+   ├─ safeJsonParse(json, default)
+   └─ Más...
+
+
+🏗️ ESTRUCTURA DE DEPENDENCIAS
+═══════════════════════════════════════════════════════════════════════════════
+
+   HTML Pages
+   │
+   ├─ index.html
+   │  └─ config.js
+   │      └─ auth.js
+   │
+   ├─ html/login.html
+   │  ├─ config.js
+   │  ├─ auth.js
+   │  │  └─ api.js
+   │  │      └─ config.js
+   │  └─ CSS
+   │
+   ├─ html/register.html
+   │  ├─ config.js
+   │  ├─ auth.js
+   │  │  └─ api.js
+   │  └─ CSS
+   │
+   └─ html/dashboard.html
+      ├─ config.js
+      ├─ auth.js
+      │  └─ api.js
+      ├─ utilities.js (opcional)
+      └─ CSS
+
+
+📡 LLAMADAS A BACKEND
+═══════════════════════════════════════════════════════════════════════════════
+
+LOGIN FLOW:
+   POST /api/auth/login
+   Payload: { username: "juan", password: "123456" }
+   Response: {
+     accessToken: "eyJhbGc...",
+     refreshToken: "eyJhbGc...",
+     user: { id, name, username }
+   }
+   Usado por: login.html
+
+REGISTER FLOW:
+   POST /api/auth/register
+   Payload: { name: "Juan", username: "juan", password: "123456" }
+   Response: { message: "Registrado", success: true }
+   Usado por: register.html
+
+PREDICCIÓN FLOW:
+   POST /api/matches/predict
+   Headers: { Authorization: "Bearer [token]" }
+   Payload: { homeTeam: "1", awayTeam: "2" }
+   Response: {
+     homeScore: 2,
+     awayScore: 1,
+     homeWinProbability: 0.65,
+     drawProbability: 0.20,
+     awayWinProbability: 0.15,
+     confidence: 0.87
+   }
+   Usado por: dashboard.html
+
+TEAMS FLOW:
+   GET /api/teams/list
+   Headers: { Authorization: "Bearer [token]" }
+   Response: [ { id: 1, name: "Argentina" }, ... ]
+   Usado por: dashboard.html
+
+HISTORY FLOW:
+   GET /api/matches/history
+   Headers: { Authorization: "Bearer [token]" }
+   Response: [ { homeTeam, awayTeam, score, date }, ... ]
+   Usado por: dashboard.html
+
+
+🔄 FLUJO COMPLETO DE LA APLICACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+1. USUARIO ABRE APLICACIÓN
+   ├─ index.html carga
+   ├─ config.js se carga (global)
+   ├─ auth.js se carga
+   │  ├─ AuthManager constructor
+   │  ├─ getStoredToken() del localStorage
+   │  ├─ getStoredUser() del localStorage
+   │  └─ Si hay token válido → authManager.isAuthenticated() = true
+   ├─ Si autenticado → window.location = dashboard.html
+   └─ Si no → Muestra landing page
+
+2. USUARIO CLIQUEA "REGISTRARSE"
+   ├─ Navega a html/register.html
+   ├─ Completa formulario
+   ├─ Presiona "Crear Cuenta"
+   ├─ authManager.register(name, username, password)
+   ├─ ApiClient hace POST /api/auth/register
+   ├─ Backend valida y crea usuario
+   ├─ Si éxito → Redirige a login.html
+   └─ Si error → Muestra alerta
+
+3. USUARIO CLIQUEA "INICIAR SESIÓN"
+   ├─ Navega a html/login.html
+   ├─ Completa formulario
+   ├─ Presiona "Iniciar Sesión"
+   ├─ authManager.login(username, password)
+   ├─ ApiClient hace POST /api/auth/login
+   ├─ Backend valida credenciales
+   ├─ Backend retorna JWT tokens
+   ├─ AuthManager guarda tokens en localStorage
+   ├─ Redirige a dashboard.html
+   └─ Dashboard carga con datos del usuario
+
+4. EN DASHBOARD
+   ├─ Navbar muestra nombre del usuario
+   ├─ ApiClient hace GET /api/teams/list
+   ├─ Popula selects con equipos
+   ├─ ApiClient hace GET /api/matches/history
+   ├─ Muestra historial reciente
+   ├─ Usuario selecciona 2 equipos
+   ├─ Presiona "Predecir"
+   ├─ ApiClient hace POST /api/matches/predict
+   ├─ Muestra resultado con probabilidades
+   ├─ Usuario puede guardar predicción
+   └─ Se agrega a historial
+
+5. CERRAR SESIÓN
+   ├─ Usuario presiona "Cerrar Sesión"
+   ├─ authManager.logout()
+   ├─ Limpia localStorage
+   ├─ Redirige a login.html
+   └─ Token ya no es válido
+
+
+⚠️ PUNTOS CRÍTICOS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. CONFIG.JS
+   • DEBE estar primero en orden de carga
+   • Define API URL (CAMBIAR ANTES DE USAR)
+   • Define timeouts y constantes
+
+2. AUTH.JS
+   • DEPENDE de config.js
+   • Crea instancia global authManager
+   • Maneja TODOS los tokens
+
+3. API.JS
+   • DEPENDE de config.js y auth.js
+   • Usa authManager para obtener token
+   • Inyecta Authorization header automaticamente
+   • Refresca token si expira
+
+4. LOCALSTORAGE
+   • jwt_token: Token de acceso
+   • refresh_token: Token para refrescar
+   • user_data: Datos del usuario
+
+5. JWT FLOW
+   • Access token: Corta duración (1 día)
+   • Refresh token: Larga duración (7 días)
+   • Si access expira → Usa refresh para obtener nuevo
+   • Si refresh expira → Logout y login again
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FIN DEL MAPA DE DEPENDENCIAS
+═══════════════════════════════════════════════════════════════════════════════
+

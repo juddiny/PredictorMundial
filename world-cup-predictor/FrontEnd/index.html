@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Cup Predictor - Predice y Gana</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Navbar Principal -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">⚽ World Cup Predictor</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#caracteristicas">Características</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#como-funciona">Cómo Funciona</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-primary btn-sm ms-2" href="html/login.html">Iniciar Sesión</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="container-main" style="padding-top: 4rem; padding-bottom: 4rem;">
+    <div style="text-align: center; color: white; max-width: 600px;">
+      <h1 style="font-size: 3rem; font-weight: 700; margin-bottom: 1rem;">
+        ⚽ World Cup Predictor
+      </h1>
+      <p style="font-size: 1.3rem; margin-bottom: 2rem; opacity: 0.95;">
+        Predice los resultados de los partidos de fútbol con inteligencia artificial y demuestra tu experiencia
+      </p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="html/register.html" class="btn btn-primary btn-lg" style="padding: 0.875rem 2rem;">
+          Crear Cuenta
+        </a>
+        <a href="html/login.html" class="btn btn-secondary btn-lg" style="padding: 0.875rem 2rem;">
+          Iniciar Sesión
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Características -->
+  <section id="caracteristicas" class="py-5" style="background: white;">
+    <div class="container">
+      <h2 class="text-center mb-5" style="font-size: 2.5rem; font-weight: 700; color: var(--dark-color);">
+        ¿Por qué elegir World Cup Predictor?
+      </h2>
+
+      <div class="row">
+        <!-- Característica 1 -->
+        <div class="col-md-4 mb-4">
+          <div class="card" style="border: none; text-align: center; padding: 2rem; box-shadow: var(--shadow);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🤖</div>
+            <h5>IA Avanzada</h5>
+            <p class="text-muted">
+              Utiliza algoritmos de machine learning entrenados con datos históricos de miles de partidos
+            </p>
+          </div>
+        </div>
+
+        <!-- Característica 2 -->
+        <div class="col-md-4 mb-4">
+          <div class="card" style="border: none; text-align: center; padding: 2rem; box-shadow: var(--shadow);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+            <h5>Análisis Profundo</h5>
+            <p class="text-muted">
+              Obtén estadísticas detalladas de probabilidades de victoria, empate y rendimiento de equipos
+            </p>
+          </div>
+        </div>
+
+        <!-- Característica 3 -->
+        <div class="col-md-4 mb-4">
+          <div class="card" style="border: none; text-align: center; padding: 2rem; box-shadow: var(--shadow);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">💾</div>
+            <h5>Historial de Predicciones</h5>
+            <p class="text-muted">
+              Guarda y rastrea todas tus predicciones para mejorar tu precisión con el tiempo
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <!-- Característica 4 -->
+        <div class="col-md-4 mb-4">
+          <div class="card" style="border: none; text-align: center; padding: 2rem; box-shadow: var(--shadow);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+            <h5>Seguro y Privado</h5>
+            <p class="text-muted">
+              Tus datos están protegidos con autenticación JWT y cifrado de extremo a extremo
+            </p>
+          </div>
+        </div>
+
+        <!-- Característica 5 -->
+        <div class="col-md-4 mb-4">
+          <div class="card" style="border: none; text-align: center; padding: 2rem; box-shadow: var(--shadow);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+            <h5>Predicciones Instantáneas</h5>
+            <p class="text-muted">
+              Obtén resultados en segundos con nuestro agente inteligente de predicción
+            </p>
+          </div>
+        </div>
+
+        <!-- Característica 6 -->
+        <div class="col-md-4 mb-4">
+          <div class="card" style="border: none; text-align: center; padding: 2rem; box-shadow: var(--shadow);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📱</div>
+            <h5>Acceso Multiplataforma</h5>
+            <p class="text-muted">
+              Accede desde cualquier dispositivo: PC, Tablet o Smartphone
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cómo Funciona -->
+  <section id="como-funciona" class="py-5">
+    <div class="container">
+      <h2 class="text-center mb-5" style="font-size: 2.5rem; font-weight: 700; color: white;">
+        ¿Cómo Funciona?
+      </h2>
+
+      <div class="row">
+        <div class="col-md-3 col-sm-6 mb-4 text-center" style="color: white;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">1️⃣</div>
+          <h5>Regístrate</h5>
+          <p>Crea tu cuenta en segundos con tu nombre, usuario y contraseña</p>
+        </div>
+
+        <div class="col-md-3 col-sm-6 mb-4 text-center" style="color: white;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">2️⃣</div>
+          <h5>Selecciona Equipos</h5>
+          <p>Elige el equipo local y visitante que deseas analizar</p>
+        </div>
+
+        <div class="col-md-3 col-sm-6 mb-4 text-center" style="color: white;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">3️⃣</div>
+          <h5>Obtén Predicción</h5>
+          <p>Nuestro agente de IA calcula el resultado probable y probabilidades</p>
+        </div>
+
+        <div class="col-md-3 col-sm-6 mb-4 text-center" style="color: white;">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">4️⃣</div>
+          <h5>Guarda y Compara</h5>
+          <p>Almacena tus predicciones y monitorea tu precisión a lo largo del tiempo</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action Final -->
+  <section class="py-5" style="background: white; text-align: center;">
+    <div class="container">
+      <h2 style="font-size: 2rem; margin-bottom: 1rem; color: var(--dark-color);">
+        ¡Comienza a Predecir Ahora!
+      </h2>
+      <p style="font-size: 1.1rem; color: #666; margin-bottom: 2rem;">
+        Únete a miles de usuarios que ya están disfrutando de predicciones precisas y análisis profundos
+      </p>
+      <a href="html/register.html" class="btn btn-primary btn-lg" style="padding: 0.875rem 3rem;">
+        Crear Cuenta Gratis
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white; padding: 3rem 0; text-align: center;">
+    <div class="container">
+      <p>&copy; 2025 World Cup Predictor. Todos los derechos reservados.</p>
+      <p style="font-size: 0.9rem; margin-top: 1rem;">
+        <a href="#" style="color: white; text-decoration: none; margin: 0 1rem;">Privacidad</a>
+        <a href="#" style="color: white; text-decoration: none; margin: 0 1rem;">Términos</a>
+        <a href="#" style="color: white; text-decoration: none; margin: 0 1rem;">Contacto</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    /**
+     * Landing Page Logic
+     */
+
+    // Verificar si ya está autenticado
+    window.addEventListener('load', () => {
+      if (authManager.isAuthenticated() && !authManager.isTokenExpired()) {
+        // Redirigir al dashboard si ya está logueado
+        window.location.href = 'html/dashboard.html';
+      }
+    });
+
+    // Smooth scroll para enlaces
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href !== '#') {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+

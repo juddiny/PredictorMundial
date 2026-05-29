@@ -1,0 +1,29 @@
+{
+  "name": "world-cup-predictor-frontend",
+  "version": "1.0.0",
+  "description": "Frontend moderno para predicción de resultados de partidos de fútbol",
+  "main": "index.html",
+  "scripts": {
+    "serve": "http-server -p 8000",
+    "serve:php": "php -S localhost:8000",
+    "serve:python": "python -m http.server 8000"
+  },
+  "keywords": [
+    "football",
+    "predictor",
+    "world-cup",
+    "prediction",
+    "machine-learning"
+  ],
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {},
+  "browserslist": [
+    "defaults",
+    "not ie <= 11"
+  ]
+}
+

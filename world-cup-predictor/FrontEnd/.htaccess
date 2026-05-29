@@ -1,0 +1,71 @@
+# Configuración para Apache
+# Habilitar mod_rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Eliminar www. (opcional)
+    # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    # RewriteRule ^(.*)$ http://%1/$1 [R=301,L]
+
+    # Redirigir todo a index.html excepto archivos y carpetas existentes
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.html [QSA,L]
+</IfModule>
+
+# Habilitar GZIP
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
+</IfModule>
+
+# Caché del navegador
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # CSS, JavaScript
+    ExpiresByType text/css "access 1 year"
+    ExpiresByType application/javascript "access 1 year"
+    ExpiresByType text/javascript "access 1 year"
+
+    # Imágenes
+    ExpiresByType image/jpeg "access 1 month"
+    ExpiresByType image/gif "access 1 month"
+    ExpiresByType image/png "access 1 month"
+    ExpiresByType image/webp "access 1 month"
+
+    # HTML
+    ExpiresByType text/html "access 1 day"
+</IfModule>
+
+# Headers de seguridad básicos
+<IfModule mod_headers.c>
+    # Prevenir clickjacking
+    Header always append X-Frame-Options "SAMEORIGIN"
+
+    # Habilitar protección XSS
+    Header always append X-XSS-Protection "1; mode=block"
+
+    # Prevenir MIME type sniffing
+    Header always append X-Content-Type-Options "nosniff"
+
+    # Content Security Policy (CSP) básico
+    Header always append Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:;"
+</IfModule>
+
+# Permitir CORS (Ajustar según necesidad)
+<IfModule mod_headers.c>
+    <FilesMatch "\.(ttf|ttc|otf|eot|woff|woff2|font.css)$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+</IfModule>
+
+# Bloquear acceso a archivos sensibles
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "\.(js|css|json)$">
+    Header set Cache-Control "max-age=31536000, public"
+</FilesMatch>
+
