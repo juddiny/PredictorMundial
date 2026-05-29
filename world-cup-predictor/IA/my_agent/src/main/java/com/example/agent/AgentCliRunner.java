@@ -1,5 +1,4 @@
 package com.example.agent;
-
 import com.google.adk.agents.RunConfig;
 import com.google.adk.events.Event;
 import com.google.adk.runner.InMemoryRunner;
@@ -9,17 +8,18 @@ import com.google.genai.types.Part;
 import io.reactivex.rxjava3.core.Flowable;
 import java.util.Scanner;
 
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class AgentCliRunner {
 
     public static void main(String[] args) {
         RunConfig runConfig = RunConfig.builder().build();
-        InMemoryRunner runner = new InMemoryRunner(HelloTimeAgent.ROOT_AGENT);
+        InMemoryRunner runner = new InMemoryRunner(FootballPredictorAgent.ROOT_AGENT);
 
         Session session = runner
                 .sessionService()
-                .createSession(runner.appName(), "user1234")
+                .createSession(runner.appName(), "user_mundial_01")
                 .blockingGet();
 
         try (Scanner scanner = new Scanner(System.in, UTF_8)) {
