@@ -9,16 +9,16 @@
    Variables
    ======================== */
 :root {
-  --green-field:   #0f172a;
-  --green-mid:     #1e293b;
-  --green-light:   #334155;
-  --gold:          #c0ff00;
-  --gold-dark:     #9acc00;
+  --green-field:   #0a2e1a;
+  --green-mid:     #0f4028;
+  --green-light:   #1a6b3a;
+  --gold:          #f5c842;
+  --gold-dark:     #c9a020;
   --red-card:      #e63946;
   --white:         #f0f4f0;
   --grey:          #8a9e8a;
-  --card-bg:       rgba(30, 41, 59, 0.85);
-  --border:        rgba(192, 255, 0, 0.3);
+  --card-bg:       rgba(10, 46, 26, 0.75);
+  --border:        rgba(245, 200, 66, 0.2);
   --shadow-glow:   0 0 40px rgba(245, 200, 66, 0.12);
   --shadow-card:   0 8px 32px rgba(0,0,0,0.5);
   --radius:        12px;

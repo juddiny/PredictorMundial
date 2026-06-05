@@ -88,12 +88,3 @@ Diseño optimizado para:
 ## 📚 Documentación Completa
 
 Ver [ESTRUCTURA.md](./ESTRUCTURA.md) para documentación detallada.
-
-## 🤝 Contribuciones
-
-Para contribuir, contacta al equipo de desarrollo.
-
----
-
-**Versión:** 1.0.0 | **Estado:** En desarrollo
-

@@ -16,29 +16,35 @@ class AuthManager {
    * @param {string} password - Contraseña
    * @returns {Promise}
    */
+  /**
+   * Realizar login (MOCK TEMPORAL PARA FASE 1 CON JWT VÁLIDO)
+   */
   async login(username, password) {
     try {
-      const response = await fetch(getApiUrl(CONFIG.ENDPOINTS.AUTH.LOGIN), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-        timeout: CONFIG.REQUEST_TIMEOUT,
-      });
+      // GENERAMOS UN PAYLOAD DE JWT FALSO PERO CON EXPIRACIÓN EN EL FUTURO (Año 2030)
+      // "exp": 1924905600 es el equivalente al 1 de Enero de 2030
+      const mockPayload = {
+        sub: username,
+        name: "Usuario Invitado",
+        roles: ["ROLE_USER"],
+        iat: Math.floor(Date.now() / 1000),
+        exp: 1924905600 
+      };
 
-      if (!response.ok) {
-        throw new Error(`Error de login: ${response.statusText}`);
-      }
+      // Codificamos el payload en Base64 para que de verdad parezca un JWT real
+      const base64Payload = btoa(JSON.stringify(mockPayload));
+      
+      // Construimos el Token Falso Completo (Header.Payload.Signature)
+      const fakeAccessToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${base64Payload}.fakesignature123`;
+      const fakeRefreshToken = "refresh.token.falso.456";
+      const userSession = { name: "Usuario Invitado", username: username };
 
-      const data = await response.json();
+      // Guardar tokens y datos de usuario en el LocalStorage
+      this.setTokens(fakeAccessToken, fakeRefreshToken);
+      this.setUser(userSession);
 
-      // Guardar tokens y datos de usuario
-      this.setTokens(data.accessToken, data.refreshToken);
-      this.setUser(data.user);
-
-      debugLog('Login exitoso', data.user);
-      return { success: true, user: data.user };
+      debugLog('Login exitoso simulado con JWT del futuro', userSession);
+      return { success: true, user: userSession };
     } catch (error) {
       debugLog('Error en login', error);
       throw error;
@@ -52,8 +58,12 @@ class AuthManager {
    * @param {string} password - Contraseña
    * @returns {Promise}
    */
+  /**
+   * Realizar registro (MOCK TEMPORAL PARA FASE 1)
+   */
   async register(name, username, password) {
     try {
+      /* COMENTAMOS EL LLAMADO REAL PARA QUE NO SE ROMPA LA RED
       const response = await fetch(getApiUrl(CONFIG.ENDPOINTS.AUTH.REGISTER), {
         method: 'POST',
         headers: {
@@ -68,8 +78,14 @@ class AuthManager {
       }
 
       const data = await response.json();
-      debugLog('Registro exitoso', data);
-      return { success: true, message: data.message };
+      */
+
+      // SIMULACIÓN: Guardamos el usuario inventado de forma local para usarlo en el login
+      const mockUser = { id: 1, name: name, username: username };
+      localStorage.setItem('mock_registered_user', JSON.stringify({ ...mockUser, password }));
+
+      debugLog('Registro exitoso simulado', mockUser);
+      return { success: true, message: "Usuario registrado con éxito en modo simulación." };
     } catch (error) {
       debugLog('Error en registro', error);
       throw error;

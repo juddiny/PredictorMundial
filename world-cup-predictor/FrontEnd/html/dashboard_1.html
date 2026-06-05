@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - World Cup Predictor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="dashboard.html">⚽ World Cup Predictor</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#predicciones">Mis Predicciones</a>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link" id="userGreeting">Usuario</span>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-logout btn-sm" onclick="logout()">Cerrar Sesión</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenedor Principal -->
+  <div class="container">
+    <!-- Header del Dashboard -->
+    <div class="dashboard-header mt-4">
+      <h1>Bienvenido! 🎯</h1>
+      <p id="headerSubtitle">Selecciona dos equipos y obtén una predicción del resultado</p>
+    </div>
+
+    <!-- Alert para mensajes -->
+    <div id="alertContainer"></div>
+
+    <!-- Sección de Predictor -->
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="prediction-card">
+          <h3 class="mb-4">Predictor de Partidos</h3>
+
+          <!-- Selectores de Equipos -->
+          <div class="team-selector">
+            <div class="team-select-container">
+              <label for="homeTeam">Equipo Local</label>
+              <select class="form-control" id="homeTeam" required>
+                <option value="">-- Selecciona equipo local --</option>
+              </select>
+            </div>
+            <div class="team-select-container">
+              <label for="awayTeam">Equipo Visitante</label>
+              <select class="form-control" id="awayTeam" required>
+                <option value="">-- Selecciona equipo visitante --</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Botón de Predicción -->
+          <button class="btn btn-primary" id="predictBtn" onclick="predictMatch()">
+            <span id="predictBtnText">Predecir Resultado</span>
+            <span id="predictSpinner" class="spinner" style="display: none; margin-left: 0.5rem;"></span>
+          </button>
+
+          <!-- Resultado de Predicción -->
+          <div id="predictionResult" style="display: none; margin-top: 2rem;">
+            <h4 class="text-center mb-3">📊 Resultado Predicho</h4>
+            <div class="prediction-result">
+              <div class="team-result">
+                <h3 id="homeTeamName">---</h3>
+                <div class="score" id="homeScore">-</div>
+              </div>
+              <div class="vs-divider">vs</div>
+              <div class="team-result">
+                <h3 id="awayTeamName">---</h3>
+                <div class="score" id="awayScore">-</div>
+              </div>
+            </div>
+
+            <!-- Estadísticas de Predicción -->
+            <div class="prediction-stats">
+              <div class="stat">
+                <div class="stat-label">Probabilidad Local</div>
+                <div class="stat-value" id="homeWinProbability">0%</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Probabilidad Empate</div>
+                <div class="stat-value" id="drawProbability">0%</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Probabilidad Visitante</div>
+                <div class="stat-value" id="awayWinProbability">0%</div>
+              </div>
+            </div>
+
+            <!-- Información Adicional -->
+            <div class="mt-3 p-3" style="background-color: #f0f8ff; border-radius: 8px;">
+              <p class="mb-2"><strong>Fecha de Predicción:</strong> <span id="predictionDate">-</span></p>
+              <p class="mb-0"><strong>Confianza:</strong> <span id="confidence">-</span></p>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-secondary flex-grow-1" onclick="savePrediction()">
+                💾 Guardar Predicción
+              </button>
+              <button class="btn btn-secondary flex-grow-1" onclick="newPrediction()">
+                🔄 Nueva Predicción
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar con Historial -->
+      <div class="col-lg-4" id="predicciones">
+        <div class="prediction-card">
+          <h4 class="mb-3">📜 Mis Predicciones Recientes</h4>
+
+          <div id="historyLoading">
+            <div class="loading-container">
+              <div class="spinner"></div>
+            </div>
+          </div>
+
+          <div id="historyList" style="display: none;">
+            <!-- Se popula con JavaScript -->
+          </div>
+
+          <div id="emptyHistory" style="display: none;">
+            <p class="text-muted text-center">No hay predicciones aún. ¡Crea una!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para guardar predicción -->
+  <div class="modal fade" id="savePredictionModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Guardar Predicción</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="predictionNote" class="form-label">Notas (opcional)</label>
+            <textarea class="form-control" id="predictionNote" placeholder="Añade notas sobre esta predicción..." rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="confirmSavePrediction()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/api.js"></script>
+  <script>
+    /**
+     * Gestión del Dashboard
+     */
+
+    let currentPrediction = null;
+    const savePredictionModal = new bootstrap.Modal(document.getElementById('savePredictionModal'));
+
+    /**
+     * Mostrar alerta
+     * @param {string} message - Mensaje a mostrar
+     * @param {string} type - Tipo de alerta
+     */
+    function showAlert(message, type = 'danger') {
+      const alertContainer = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type} alert-dismissible fade show`;
+      alert.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+
+      alertContainer.appendChild(alert);
+
+      setTimeout(() => {
+        if (alert.parentElement) {
+          alert.remove();
+        }
+      }, 5000);
+    }
+
+    /**
+     * Verificar autenticación y cargar datos
+     */
+    window.addEventListener('load', async () => {
+      // Verificar si está autenticado
+      if (!authManager.isAuthenticated()) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Verificar si token está expirado
+      if (authManager.isTokenExpired()) {
+        const refreshed = await authManager.refreshAccessToken();
+        if (!refreshed) {
+          window.location.href = 'login.html';
+          return;
+        }
+      }
+
+      // Cargar datos del usuario
+      const user = authManager.getUser();
+      if (user) {
+        document.getElementById('userGreeting').textContent = `Hola, ${user.name || user.username}`;
+        document.getElementById('headerSubtitle').textContent = `Bienvenido ${user.name || user.username}, realiza una predicción`;
+      }
+
+      // Cargar equipos
+      await loadTeams();
+
+      // Cargar historial
+      await loadHistory();
+    });
+
+    /**
+     * Cargar lista de equipos
+     */
+    async function loadTeams() {
+      try {
+        const teams = await PredictionService.getTeams();
+
+        const homeTeamSelect = document.getElementById('homeTeam');
+        const awayTeamSelect = document.getElementById('awayTeam');
+
+        teams.forEach(team => {
+          const option1 = document.createElement('option');
+          option1.value = team.id;
+          option1.textContent = team.name;
+          homeTeamSelect.appendChild(option1);
+
+          const option2 = document.createElement('option');
+          option2.value = team.id;
+          option2.textContent = team.name;
+          awayTeamSelect.appendChild(option2);
+        });
+
+        debugLog('Equipos cargados exitosamente', teams);
+      } catch (error) {
+        debugLog('Error al cargar equipos', error);
+        showAlert('Error al cargar los equipos. '+ error.message, 'warning');
+      }
+    }
+
+    /**
+     * Realizar predicción
+     */
+    async function predictMatch() {
+      const homeTeam = document.getElementById('homeTeam').value;
+      const awayTeam = document.getElementById('awayTeam').value;
+
+      // Validación
+      if (!homeTeam || !awayTeam) {
+        showAlert('Por favor selecciona ambos equipos', 'warning');
+        return;
+      }
+
+      if (homeTeam === awayTeam) {
+        showAlert('Selecciona equipos diferentes', 'warning');
+        return;
+      }
+
+      // Mostrar carga
+      const predictBtn = document.getElementById('predictBtn');
+      const predictBtnText = document.getElementById('predictBtnText');
+      const predictSpinner = document.getElementById('predictSpinner');
+
+      predictBtn.disabled = true;
+      predictBtnText.style.display = 'none';
+      predictSpinner.style.display = 'inline-block';
+
+      try {
+        const homeTeamName = document.querySelector(`#homeTeam option[value="${homeTeam}"]`).textContent;
+        const awayTeamName = document.querySelector(`#awayTeam option[value="${awayTeam}"]`).textContent;
+
+        // Llamar API para predicción
+        const result = await PredictionService.predictMatch(homeTeam, awayTeam);
+
+        // Guardar predicción actual
+        currentPrediction = {
+          ...result,
+          homeTeamId: homeTeam,
+          homeTeamName: homeTeamName,
+          awayTeamId: awayTeam,
+          awayTeamName: awayTeamName,
+          timestamp: new Date().toISOString(),
+        };
+
+        // Mostrar resultado
+        displayPrediction(result, homeTeamName, awayTeamName);
+
+      } catch (error) {
+        debugLog('Error en predicción', error);
+        showAlert('Error al realizar la predicción: ' + error.message, 'danger');
+      } finally {
+        predictBtn.disabled = false;
+        predictBtnText.style.display = 'inline';
+        predictSpinner.style.display = 'none';
+      }
+    }
+
+    /**
+     * Mostrar resultado de predicción
+     */
+    function displayPrediction(result, homeTeamName, awayTeamName) {
+      document.getElementById('homeTeamName').textContent = homeTeamName;
+      document.getElementById('awayTeamName').textContent = awayTeamName;
+
+      document.getElementById('homeScore').textContent = result.homeScore || '0';
+      document.getElementById('awayScore').textContent = result.awayScore || '0';
+
+      document.getElementById('homeWinProbability').textContent =
+        (result.homeWinProbability * 100).toFixed(1) + '%';
+      document.getElementById('drawProbability').textContent =
+        (result.drawProbability * 100).toFixed(1) + '%';
+      document.getElementById('awayWinProbability').textContent =
+        (result.awayWinProbability * 100).toFixed(1) + '%';
+
+      document.getElementById('predictionDate').textContent =
+        new Date().toLocaleString('es-ES');
+      document.getElementById('confidence').textContent =
+        (result.confidence * 100).toFixed(1) + '%';
+
+      document.getElementById('predictionResult').style.display = 'block';
+
+      // Scroll al resultado
+      document.getElementById('predictionResult').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    /**
+     * Guardar predicción
+     */
+    function savePrediction() {
+      if (!currentPrediction) {
+        showAlert('No hay predicción para guardar', 'warning');
+        return;
+      }
+      savePredictionModal.show();
+    }
+
+    /**
+     * Confirmar guardar predicción
+     */
+    async function confirmSavePrediction() {
+      try {
+        const note = document.getElementById('predictionNote').value;
+
+        // Aquí iría la llamada para guardar la predicción al backend
+        // await PredictionService.savePrediction({ ...currentPrediction, note });
+
+        showAlert('Predicción guardada exitosamente', 'success');
+        savePredictionModal.hide();
+        document.getElementById('predictionNote').value = '';
+
+        // Recargar historial
+        await loadHistory();
+      } catch (error) {
+        showAlert('Error al guardar la predicción: ' + error.message, 'danger');
+      }
+    }
+
+    /**
+     * Nueva predicción
+     */
+    function newPrediction() {
+      document.getElementById('homeTeam').value = '';
+      document.getElementById('awayTeam').value = '';
+      document.getElementById('predictionResult').style.display = 'none';
+      currentPrediction = null;
+    }
+
+    /**
+     * Cargar historial de predicciones
+     */
+    async function loadHistory() {
+      try {
+        const historyList = document.getElementById('historyList');
+        const emptyHistory = document.getElementById('emptyHistory');
+        const historyLoading = document.getElementById('historyLoading');
+
+        const history = await PredictionService.getMatchHistory();
+
+        historyLoading.style.display = 'none';
+
+        if (!history || history.length === 0) {
+          emptyHistory.style.display = 'block';
+          return;
+        }
+
+        historyList.innerHTML = '';
+        historyList.style.display = 'block';
+
+        history.slice(0, 5).forEach(prediction => {
+          const item = document.createElement('div');
+          item.className = 'history-item';
+          item.innerHTML = `
+            <div class="history-match">
+              <div class="history-teams">
+                <strong>${prediction.homeTeamName}</strong><br>
+                <small class="text-muted">vs</small><br>
+                <strong>${prediction.awayTeamName}</strong>
+              </div>
+              <div class="history-score">
+                <strong>${prediction.homeScore}-${prediction.awayScore}</strong><br>
+                <small class="history-date">${new Date(prediction.timestamp).toLocaleDateString('es-ES')}</small>
+              </div>
+            </div>
+          `;
+          historyList.appendChild(item);
+        });
+
+      } catch (error) {
+        debugLog('Error al cargar historial', error);
+        document.getElementById('historyLoading').style.display = 'none';
+        document.getElementById('emptyHistory').style.display = 'block';
+      }
+    }
+
+    /**
+     * Logout
+     */
+    function logout() {
+      if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+        authManager.logout();
+        window.location.href = 'login.html';
+      }
+    }
+  </script>
+</body>
+</html>
+
