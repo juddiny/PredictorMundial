@@ -8,6 +8,13 @@ class AuthManager {
     this.token = this.getStoredToken();
     this.refreshToken = this.getStoredRefreshToken();
     this.user = this.getStoredUser();
+
+    if (!this.user && this.token) {
+      this.user = this.getUserFromToken();
+      if (this.user) {
+        localStorage.setItem(CONFIG.STORAGE.USER_KEY, JSON.stringify(this.user));
+      }
+    }
   }
 
   /**
@@ -16,35 +23,34 @@ class AuthManager {
    * @param {string} password - Contraseña
    * @returns {Promise}
    */
-  /**
-   * Realizar login (MOCK TEMPORAL PARA FASE 1 CON JWT VÁLIDO)
-   */
   async login(username, password) {
     try {
-      // GENERAMOS UN PAYLOAD DE JWT FALSO PERO CON EXPIRACIÓN EN EL FUTURO (Año 2030)
-      // "exp": 1924905600 es el equivalente al 1 de Enero de 2030
-      const mockPayload = {
-        sub: username,
-        name: "Usuario Invitado",
-        roles: ["ROLE_USER"],
-        iat: Math.floor(Date.now() / 1000),
-        exp: 1924905600 
-      };
+      const response = await fetch(getApiUrl(CONFIG.ENDPOINTS.AUTH.LOGIN), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-      // Codificamos el payload en Base64 para que de verdad parezca un JWT real
-      const base64Payload = btoa(JSON.stringify(mockPayload));
-      
-      // Construimos el Token Falso Completo (Header.Payload.Signature)
-      const fakeAccessToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${base64Payload}.fakesignature123`;
-      const fakeRefreshToken = "refresh.token.falso.456";
-      const userSession = { name: "Usuario Invitado", username: username };
+        if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = errorText || 'Error de login';
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.message || errorJson.error || errorMessage;
+        } catch (_) {
+          // No es JSON, mantenemos el texto original
+        }
+        throw new Error(errorMessage);
+      }
 
-      // Guardar tokens y datos de usuario en el LocalStorage
-      this.setTokens(fakeAccessToken, fakeRefreshToken);
-      this.setUser(userSession);
+      const data = await response.json();
+      this.setTokens(data.accessToken, data.refreshToken);
+      this.setUser({ username: data.username, name: data.name, roles: data.roles });
 
-      debugLog('Login exitoso simulado con JWT del futuro', userSession);
-      return { success: true, user: userSession };
+      debugLog('Login exitoso', data);
+      return { success: true, user: this.user };
     } catch (error) {
       debugLog('Error en login', error);
       throw error;
@@ -58,34 +64,24 @@ class AuthManager {
    * @param {string} password - Contraseña
    * @returns {Promise}
    */
-  /**
-   * Realizar registro (MOCK TEMPORAL PARA FASE 1)
-   */
   async register(name, username, password) {
     try {
-      /* COMENTAMOS EL LLAMADO REAL PARA QUE NO SE ROMPA LA RED
       const response = await fetch(getApiUrl(CONFIG.ENDPOINTS.AUTH.REGISTER), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ name, username, password }),
-        timeout: CONFIG.REQUEST_TIMEOUT,
       });
 
       if (!response.ok) {
-        throw new Error(`Error de registro: ${response.statusText}`);
+        const error = await response.text();
+        throw new Error(error || 'Error de registro');
       }
 
       const data = await response.json();
-      */
-
-      // SIMULACIÓN: Guardamos el usuario inventado de forma local para usarlo en el login
-      const mockUser = { id: 1, name: name, username: username };
-      localStorage.setItem('mock_registered_user', JSON.stringify({ ...mockUser, password }));
-
-      debugLog('Registro exitoso simulado', mockUser);
-      return { success: true, message: "Usuario registrado con éxito en modo simulación." };
+      debugLog('Registro exitoso', data);
+      return { success: true, message: data.message };
     } catch (error) {
       debugLog('Error en registro', error);
       throw error;
@@ -110,7 +106,7 @@ class AuthManager {
    * @returns {boolean}
    */
   isAuthenticated() {
-    return !!this.token;
+    return !!this.token && !this.isTokenExpired();
   }
 
   /**
@@ -212,6 +208,19 @@ class AuthManager {
    * Refrescar el token
    * @returns {Promise}
    */
+  getUserFromToken() {
+    const decoded = this.decodeToken(this.token);
+    if (!decoded) {
+      return null;
+    }
+
+    return {
+      username: decoded.sub,
+      name: decoded.name || decoded.sub,
+      roles: decoded.roles || [],
+    };
+  }
+
   async refreshAccessToken() {
     try {
       if (!this.refreshToken) {
@@ -222,9 +231,8 @@ class AuthManager {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.refreshToken}`,
         },
-        timeout: CONFIG.REQUEST_TIMEOUT,
+        body: JSON.stringify({ refreshToken: this.refreshToken }),
       });
 
       if (!response.ok) {
@@ -233,6 +241,7 @@ class AuthManager {
 
       const data = await response.json();
       this.setTokens(data.accessToken, data.refreshToken);
+      this.setUser({ username: data.username, name: data.name, roles: data.roles });
       debugLog('Token refrescado exitosamente');
       return true;
     } catch (error) {

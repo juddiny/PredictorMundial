@@ -5,7 +5,16 @@
 
 const CONFIG = {
   // URL base de la API (Spring Boot Backend)
-  API_BASE_URL: 'http://localhost:8080/api',
+  // Construye la URL del backend usando el host del navegador (útil en LAN)
+  API_BASE_URL: (function() {
+    try {
+      const host = window.location.hostname || 'localhost';
+      const protocol = window.location.protocol || 'http:';
+      return `${protocol}//${host}:8080/api`;
+    } catch (e) {
+      return 'http://localhost:8080/api';
+    }
+  })(),
 
   // Endpoints disponibles
   ENDPOINTS: {

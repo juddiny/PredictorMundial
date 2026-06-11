@@ -4,7 +4,8 @@
   "description": "Frontend moderno para predicción de resultados de partidos de fútbol",
   "main": "index.html",
   "scripts": {
-    "serve": "http-server -p 8000",
+    "start": "npm run serve",
+    "serve": "node ./node_modules/http-server/bin/http-server -a 0.0.0.0 -p 8000",
     "serve:php": "php -S localhost:8000",
     "serve:python": "python -m http.server 8000"
   },

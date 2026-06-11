@@ -166,9 +166,11 @@
 
       } catch (error) {
         debugLog('Error en login', error);
-        let errorMessage = 'Error al iniciar sesión. Intenta nuevamente.';
-        if (error.message.includes('401'))     errorMessage = 'Usuario o contraseña incorrectos.';
-        else if (error.message.includes('network')) errorMessage = 'Error de conexión. Verifica tu internet.';
+        let errorMessage = error?.message || 'Error al iniciar sesión. Intenta nuevamente.';
+        const em = errorMessage.toLowerCase();
+        if (em.includes('failed to fetch') || em.includes('network')) {
+          errorMessage = 'Error de conexión. Verifica que el backend esté corriendo y accesible desde este equipo.';
+        }
         showAlert(errorMessage, 'danger');
       } finally {
         submitBtn.disabled = false;

@@ -30,7 +30,6 @@ class ApiClient {
     const config = {
       method,
       headers,
-      timeout: CONFIG.REQUEST_TIMEOUT,
       ...options,
     };
 

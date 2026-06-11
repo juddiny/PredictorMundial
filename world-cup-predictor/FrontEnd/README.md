@@ -12,15 +12,18 @@ API_BASE_URL: 'http://localhost:8080/api'
 
 ### 2. Servir la aplicación
 ```bash
-# Python
+# Instalar dependencias si no están instaladas
+npm install
+
+# Iniciar server con npm
+npm start
+
+# Alternativas si no quieres usar npm
 python -m http.server 8000
-
-# Node.js
-npm install -g http-server && http-server
-
-# PHP
 php -S localhost:8000
 ```
+
+> Nota Windows: si `npm start` falla y tu variable `COMSPEC` apunta a Python, crea o actualiza `.npmrc` con `script-shell="C:\\Windows\\System32\\cmd.exe"`.
 
 ### 3. Abrir en navegador
 ```

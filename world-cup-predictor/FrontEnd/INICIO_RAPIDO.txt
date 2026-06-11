@@ -83,17 +83,23 @@ PASO 1: Configurar URL de API
    (por la URL de tu Spring Boot)
 
 PASO 2: Iniciar Servidor
-   Opción A - Python (recomendado):
+   Opción A - Node.js (recomendado si usas npm):
+   $ cd FrontEnd
+   $ npm install
+   $ npm start
+
+   Si `npm start` falla en Windows, crea el archivo `.npmrc` en FrontEnd con:
+   script-shell="C:\\Windows\\System32\\cmd.exe"
+
+   Opción B - Python:
    $ cd FrontEnd
    $ python -m http.server 8000
 
-   Opción B - PHP:
+   Opción C - PHP:
+   $ cd FrontEnd
    $ php -S localhost:8000
 
-   Opción C - Node.js:
-   $ npx http-server
-
-   Opción D - Script automático:
+   Opción D - Script automático (Linux/macOS):
    $ chmod +x setup.sh
    $ ./setup.sh
 

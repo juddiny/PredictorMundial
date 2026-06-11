@@ -256,20 +256,35 @@
 
         teams.forEach(team => {
           const opt1 = document.createElement('option');
-          opt1.value = team.id;
-          opt1.textContent = team.name;
+          opt1.value = team;
+          opt1.textContent = team;
           homeTeamSelect.appendChild(opt1);
 
           const opt2 = document.createElement('option');
-          opt2.value = team.id;
-          opt2.textContent = team.name;
+          opt2.value = team;
+          opt2.textContent = team;
           awayTeamSelect.appendChild(opt2);
         });
+
+        homeTeamSelect.addEventListener('change', handleTeamSelectionChange);
+        awayTeamSelect.addEventListener('change', handleTeamSelectionChange);
 
         debugLog('Equipos cargados', teams);
       } catch (error) {
         debugLog('Error al cargar equipos', error);
         showAlert('Error al cargar los equipos. ' + error.message, 'warning');
+      }
+    }
+
+    function handleTeamSelectionChange(event) {
+      const homeTeamSelect = document.getElementById('homeTeam');
+      const awayTeamSelect = document.getElementById('awayTeam');
+      const homeTeam = homeTeamSelect.value;
+      const awayTeam = awayTeamSelect.value;
+
+      if (homeTeam && awayTeam && homeTeam === awayTeam) {
+        showAlert('No puedes seleccionar el mismo equipo en ambos campos.', 'warning');
+        event.target.value = '';
       }
     }
 
@@ -353,6 +368,9 @@
         showAlert('No hay predicción para guardar', 'warning');
         return;
       }
+
+      const noteField = document.getElementById('predictionNote');
+      noteField.value = currentPrediction.aiAnalysis || currentPrediction.analysis || '';
       document.getElementById('savePredictionModal').classList.add('show');
     }
 
