@@ -7,7 +7,7 @@ const CONFIG = {
   // URL base de la API (Spring Boot Backend)
   // En produccion: URL de Render. En local: detecta automaticamente el host.
   API_BASE_URL: (function() {
-    const RENDER_URL = 'RENDER_BACKEND_URL_PLACEHOLDER';
+    const RENDER_URL = 'https://worldcup-backend-j84l.onrender.com/api';
     if (RENDER_URL !== 'RENDER_BACKEND_URL_PLACEHOLDER') {
       return RENDER_URL;
     }
