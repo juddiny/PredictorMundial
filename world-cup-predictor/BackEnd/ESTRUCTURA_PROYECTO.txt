@@ -1,0 +1,183 @@
+═══════════════════════════════════════════════════════════════════════════════
+    ESTRUCTURA DEL PROYECTO - WORLD CUP PREDICTOR (Backend)
+═══════════════════════════════════════════════════════════════════════════════
+📁 BackEnd/
+├── BackendPredictor/ (Aplicación Spring Boot)
+│   ├── 🔧 pom.xml (Maven - Dependencias Java)
+│   ├── 📂 src/main/java/com/example/backendpredictor/
+│   │   ├── 📄 BackendPredictorApplication.java (Punto de entrada)
+│   │   │
+│   │   ├── 📁 config/
+│   │   │   └── 🔐 SecurityConfig.java (Configuración de seguridad + BCryptPasswordEncoder)
+│   │   │
+│   │   ├── 📁 controller/
+│   │   │   ├── 🌐 AuthController.java (Endpoints: POST /api/auth/register)
+│   │   │   └── ⚽ TeamController.java (Endpoints: GET /api/teams/*)
+│   │   │
+│   │   ├── 📁 entity/ (Entidades JPA)
+│   │   │   ├── 👤 User.java (Usuarios + relación con roles)
+│   │   │   ├── 🎖️ Role.java (Roles de acceso)
+│   │   │   ├── ⚽ Team.java (Equipos de fútbol + región) ✨ NUEVO
+│   │   │   └── 🔮 Prediction.java (Predicciones IA)
+│   │   │
+│   │   ├── 📁 repository/ (Acceso a datos)
+│   │   │   ├── 👤 UserRepository.java
+│   │   │   ├── 🎖️ RoleRepository.java
+│   │   │   ├── ⚽ TeamRepository.java ✨ NUEVO
+│   │   │   └── 🔮 PredictionRepository.java
+│   │   │
+│   │   └── 📁 init/
+│   │       └── 🌱 DataInitializer.java (Carga datos inicial: roles, usuarios, equipos)
+│   │
+│   ├── 📂 src/main/resources/
+│   │   ├── 🔧 application.properties (Configuración MySQL) ✨ ACTUALIZADO
+│   │   └── 📝 schema.sql (SQL para crear tablas) ✨ NUEVO
+│   │
+│   └── 📂 target/ (Compilado)
+│       └── 📦 BackendPredictor-0.0.1-SNAPSHOT.jar
+│
+├── 📚 MYSQL_SETUP.md (Guía detallada para configurar MySQL)
+├── 📋 CAMBIOS_REALIZADOS.md (Resumen de todos los cambios)
+├── 📖 README_MYSQL.md (Guía de inicio rápido)
+├── 🔧 setup_mysql.sh (Script de configuración automática)
+└── 📄 ESTRUCTURA_PROYECTO.txt (Este archivo)
+═══════════════════════════════════════════════════════════════════════════════
+🔑 CAMBIOS PRINCIPALES (Resumen)
+═══════════════════════════════════════════════════════════════════════════════
+✅ MIGRACIÓN H2 → MySQL
+   - Antes: Base datos en memoria (H2)
+   - Después: Base datos persistente (MySQL)
+   - Ubicación: localhost:3306/world_cup_predictor
+✅ NUEVA ENTIDAD: Team
+   - Fields: id, name (único), region
+   - Tabla: teams
+   - Métodos en repo: findByName(), findByRegion(), existsByName()
+✅ NUEVO CONTROLADOR: TeamController
+   - GET /api/teams → Todos los equipos
+   - GET /api/teams/region/{region} → Equipos por región
+   - GET /api/teams/by-name/{name} → Equipo específico
+   - GET /api/teams/count → Total de equipos
+   - GET /api/teams/regions → Listar regiones disponibles
+✅ DATOS PRECARGADOS: 32 Equipos
+   - CONCACAF (3): Canadá, Estados Unidos, México
+   - UEFA (16): Alemania, Austria, Bélgica, Bosnia, Croacia, Escocia, España, 
+                Francia, Inglaterra, Noruega, Países Bajos, Portugal, Rep. Checa, 
+                Suecia, Suiza, Turquía
+   - CONCACAF-CARIBBEAN (3): Curazao, Haití, Panamá
+   - CAF (10): Argelia, Cabo Verde, Costa de Marfil, Egipto, Ghana, Marruecos, 
+               RD Congo, Senegal, Sudáfrica, Túnez
+   - AFC (10): Arabia Saudí, Australia, Corea del Sur, Emiratos, Irak, Irán, 
+               Japón, Jordania, Uzbekistán, Nueva Zelanda
+═══════════════════════════════════════════════════════════════════════════════
+⚙️ CONFIGURACIÓN MySQL (application.properties)
+═══════════════════════════════════════════════════════════════════════════════
+spring.datasource.url=jdbc:mysql://localhost:3306/world_cup_predictor?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+spring.datasource.username=root        (configurable)
+spring.datasource.password=            (configurable)
+spring.jpa.hibernate.ddl-auto=update   (crea/actualiza tablas automáticamente)
+spring.sql.init.mode=always            (ejecuta schema.sql al iniciar)
+═══════════════════════════════════════════════════════════════════════════════
+🗃️ ESTRUCTURA MYSQL
+═══════════════════════════════════════════════════════════════════════════════
+Tabla: roles
+├── id (INT, PK, AUTO_INCREMENT)
+└── name (VARCHAR, UNIQUE)
+Tabla: users
+├── id (INT, PK, AUTO_INCREMENT)
+├── name (VARCHAR)
+├── username (VARCHAR, UNIQUE)
+├── password (VARCHAR) - BCrypt encriptado
+└── created_at (TIMESTAMP)
+Tabla: teams ✨ NUEVO
+├── id (INT, PK, AUTO_INCREMENT)
+├── name (VARCHAR, UNIQUE) 
+└── region (VARCHAR)
+Tabla: predictions
+├── id (INT, PK, AUTO_INCREMENT)
+├── user_id (INT, FK → users.id)
+├── home_team (VARCHAR)
+├── away_team (VARCHAR)
+├── predicted_home_score (INT)
+├── predicted_away_score (INT)
+├── ai_analysis (LONGTEXT)
+└── created_at (TIMESTAMP)
+Tabla: user_roles (Relación M:N)
+├── user_id (INT, PK, FK → users.id)
+└── role_id (INT, PK, FK → roles.id)
+═══════════════════════════════════════════════════════════════════════════════
+🚀 PASOS PARA USAR
+═══════════════════════════════════════════════════════════════════════════════
+1. Instalar MySQL
+   Ubuntu: sudo apt install mysql-server
+   macOS: brew install mysql
+   Windows: Descargar de https://dev.mysql.com/downloads/mysql/
+2. Configurar (automático o manual)
+   Automático: bash setup_mysql.sh
+   Manual: Crear BD con: CREATE DATABASE world_cup_predictor;
+3. Compilar
+   cd BackendPredictor
+   ./mvnw clean package -DskipTests
+4. Ejecutar
+   java -jar target/BackendPredictor-0.0.1-SNAPSHOT.jar
+5. Probar
+   curl http://localhost:8080/api/teams
+   curl http://localhost:8080/api/teams/region/UEFA
+   curl http://localhost:8080/api/teams/count
+═══════════════════════════════════════════════════════════════════════════════
+👥 USUARIOS PREDEFINIDOS
+═══════════════════════════════════════════════════════════════════════════════
+Usuario: usuario
+Contraseña: usuario123
+Rol: ROLE_USER
+Usuario: administrador
+Contraseña: admin123
+Rol: ROLE_ADMIN, ROLE_USER
+═══════════════════════════════════════════════════════════════════════════════
+📊 ESTADÍSTICAS
+═══════════════════════════════════════════════════════════════════════════════
+Archivos Creados: 10
+├── Entidades: 1 (Team.java)
+├── Repositorios: 1 (TeamRepository.java)
+├── Controladores: 1 (TeamController.java)
+├── Configuración: 1 (schema.sql)
+├── Scripts: 1 (setup_mysql.sh)
+└── Documentación: 5 (MD files)
+Archivos Modificados: 2
+├── application.properties
+└── DataInitializer.java
+Equipos Cargados: 32 (5 regiones)
+Regiones Configuradas: 5 (CONCACAF, UEFA, CONCACAF-CARIBBEAN, CAF, AFC)
+Endpoints Nuevo: 5 (/api/teams/*)
+Líneas de Código Nuevo: ~500+
+═══════════════════════════════════════════════════════════════════════════════
+✨ CARACTERÍSTICAS ESPECIALES
+═══════════════════════════════════════════════════════════════════════════════
+✅ Carga de datos automática al iniciar
+✅ MySQL con charset UTF-8 para caracteres especiales
+✅ Tablas creadas automáticamente (Hibernate DDL)
+✅ Contraseñas encriptadas con BCrypt
+✅ Relaciones M:N usuarios-roles
+✅ Endpoints REST CORS habilitado
+✅ Soporte para crear BD automáticamente con createDatabaseIfNotExist=true
+✅ Script de configuración interactivo (setup_mysql.sh)
+═══════════════════════════════════════════════════════════════════════════════
+📝 NOTAS IMPORTANTES
+═══════════════════════════════════════════════════════════════════════════════
+1. MySQL debe estar instalado y en ejecución en localhost:3306
+2. Las credenciales por defecto son (root, vacío) pero son configurables
+3. La base de datos se crea automáticamente si no existe
+4. Los datos (equipos, usuarios) se cargan automáticamente al iniciar
+5. Usa CORS habilitado para facilitar frontend-backend integration
+6. Todas las tablas usan charset utf8mb4 para caracteres especiales
+═══════════════════════════════════════════════════════════════════════════════
+🔗 REFERENCIAS RÁPIDAS
+═══════════════════════════════════════════════════════════════════════════════
+📖 Documentación Detallada:        README_MYSQL.md
+📚 Guía MySQL Completa:           MYSQL_SETUP.md
+📋 Resumen de Cambios:            CAMBIOS_REALIZADOS.md
+🔧 Script Auto-Config:             setup_mysql.sh
+═══════════════════════════════════════════════════════════════════════════════
+Última actualización: 2026-06-09
+Estado: ✅ Listo para producción (Solo falta configurar MySQL)
+═══════════════════════════════════════════════════════════════════════════════

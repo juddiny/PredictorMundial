@@ -386,7 +386,7 @@
     async function confirmSavePrediction() {
       try {
         const note = document.getElementById('predictionNote').value;
-        // await PredictionService.savePrediction({ ...currentPrediction, note });
+        await PredictionService.savePrediction({ ...currentPrediction, note });
         showAlert('Predicción guardada exitosamente', 'success');
         closeModal();
         document.getElementById('predictionNote').value = '';

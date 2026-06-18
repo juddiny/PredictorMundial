@@ -1,5 +1,6 @@
 package com.worldcup.predictor.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,9 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${allowed.origins:*}")
+    private String allowedOriginsStr;
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService customUserDetailsService;
@@ -66,8 +70,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permitir orígenes desde cualquier frontend en desarrollo
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        List<String> origins = List.of(allowedOriginsStr.split(","));
+        configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));

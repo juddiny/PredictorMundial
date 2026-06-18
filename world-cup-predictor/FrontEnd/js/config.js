@@ -5,8 +5,12 @@
 
 const CONFIG = {
   // URL base de la API (Spring Boot Backend)
-  // Construye la URL del backend usando el host del navegador (útil en LAN)
+  // En produccion: URL de Render. En local: detecta automaticamente el host.
   API_BASE_URL: (function() {
+    const RENDER_URL = 'RENDER_BACKEND_URL_PLACEHOLDER';
+    if (RENDER_URL !== 'RENDER_BACKEND_URL_PLACEHOLDER') {
+      return RENDER_URL;
+    }
     try {
       const host = window.location.hostname || 'localhost';
       const protocol = window.location.protocol || 'http:';
